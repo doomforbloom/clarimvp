@@ -1,59 +1,28 @@
 <script>
     import { Application } from "pixi.js";
-    import Layer from "./Layers.svelte";
-    import nodeBuilder from "./Node.svelte";
     import { getTypingMode } from "./Global.svelte";
     import { setCurrLayer, getCurrLayer } from "./Global.svelte";
+    import createNewLayer from "./Layers.svelte";
+    import HUD from "./HUD.svelte";
 
     (async () => {
         // create app, init app, add canvas to DOM
         const app = new Application();
         await app.init({ background: "333333", resizeTo: window });
-        app.canvas.style.position = "absolute"; //? why
-        document.body.appendChild(app.canvas); 
+        app.canvas.style.position = "absolute"; // make sure canvas fills screen
+        document.body.appendChild(app.canvas);
 
         // create and add a container to the stage
         const colors = ["#f3d3bd", "#d3f3bd", "#bdd3f3", "#f3bdd3"];
-        const layer = Layer(colors.at(getCurrLayer() % colors.length));
+        const layer = createNewLayer(colors.at(getCurrLayer() % colors.length));
         app.stage.addChild(layer);
 
-        // generate initial nodes from localStorage
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const nodeData = JSON.parse(localStorage.getItem(key));
-            if (nodeData.parent === getCurrLayer()) {
-                const newNode = nodeBuilder(
-                    nodeData.id,
-                    nodeData.title,
-                    nodeData.content,
-                    nodeData.parent ? parseInt(document.cookie) : 0,
-                    nodeData.worldX,
-                    nodeData.worldY,
-                );
-                layer.addChild(newNode);
-            }
-        }
-
-        // listen for dblclicks to add nodes
-        window.addEventListener("dblclick", (e) => {
-            const worldPos = layer.toLocal({ x: e.x, y: e.y });
-            layer.addChild(
-                nodeBuilder(
-                    crypto.randomUUID(),
-                    "",
-                    "",
-                    getCurrLayer(),
-                    worldPos.x,
-                    worldPos.y,
-                ),
-            );
-        });
+        //  app.stage.addChild(HUD())
 
         // listen for keypresses to change layers
         window.addEventListener("keypress", (e) => {
-            if (getTypingMode()) {
-                return;
-            } else {
+            if (getTypingMode()) return;
+            else {
                 if (e.key === "q") {
                     setCurrLayer(getCurrLayer() + 1);
                 }
@@ -82,9 +51,8 @@
         app.ticker.add(() => {
             const speed = 15;
             // wasd movement
-            if (getTypingMode()) {
-                return;
-            } else {
+            if (getTypingMode()) return;
+            else {
                 if (keys.w) layer.y += speed;
                 if (keys.s) layer.y -= speed;
                 if (keys.a) layer.x += speed;
@@ -93,8 +61,8 @@
 
             // zoom
             if (zoomDelta !== 0) {
-                const zoomSpeed = 0.2;
-                const scale = zoomDelta > 0 ? 1 - zoomSpeed : 1 + zoomSpeed;
+                const zoomSpeed = 0.1;
+                const scale = zoomDelta > 0 ? 0.9 : 1.1;
 
                 const newScale = Math.min(
                     3,
@@ -107,5 +75,3 @@
         });
     })();
 </script>
-
-<h1>{getCurrLayer()}</h1>

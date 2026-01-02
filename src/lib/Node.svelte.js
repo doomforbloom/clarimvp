@@ -1,7 +1,8 @@
 import { Container, DOMContainer, Graphics } from "pixi.js";
-import { setCurrLayer, setTypingMode } from "./Global.svelte";
+import { getCurrLayer, setCurrLayer, setTypingMode } from "./Global.svelte";
 
-export default function nodeBuilder(id, title, content, currParent, worldX, worldY) {
+// this builds nodes from new data or localStorage
+export function nodeBuilder(id, title, content, currParent, worldX, worldY) {
     // div to hold everything
     const divElement = document.createElement("div");
     divElement.style.backgroundColor = "#f3d3bd";
@@ -40,16 +41,18 @@ export default function nodeBuilder(id, title, content, currParent, worldX, worl
     // text to add content directly to node
     let titleContent = document.createElement("input");
     titleContent.type = "text";
+    titleContent.value = title;
     titleContent.onfocus = () => {
         setTypingMode(true);
     };
     titleContent.onblur = () => {
         setTypingMode(false);
-        
+
     };
     divElement.appendChild(titleContent);
 
     let textContent = document.createElement("textarea");
+    textContent.value = content;
     textContent.onfocus = () => {
         setTypingMode(true);
     };
@@ -59,38 +62,55 @@ export default function nodeBuilder(id, title, content, currParent, worldX, worl
     divElement.appendChild(textContent);
 
     // turn node into pixi.js compatible dom element
-    const Node_DOM_Element = new DOMContainer();
-    Node_DOM_Element.element = divElement;
+    const pixiNodeElement = new DOMContainer();
+    pixiNodeElement.element = divElement;
 
     // set position of node
-    Node_DOM_Element.x = worldX;
-    Node_DOM_Element.y = worldY;
+    pixiNodeElement.x = worldX;
+    pixiNodeElement.y = worldY;
 
     // button to delete node
     let deleteBtn = document.createElement("button");
     deleteBtn.textContent = "Delete Node";
     deleteBtn.onclick = () => {
         setTypingMode(false);
-        Node_DOM_Element.removeFromParent();
-        localStorage.removeItem(id);
+        deleteNodeData();
     };
     divElement.appendChild(deleteBtn);
 
+    // store node data
     function storeNodeData() {
         const nodeData = {
-            id: crypto.randomUUID(),
+            id: id,
             title: titleContent.value,
             content: textContent.value,
             parent: currParent,
             children: [],
-            worldX: Node_DOM_Element.x,
-            worldY: Node_DOM_Element.y,
-            sizeX: divElement.style.width,
-            sizeY: divElement.style.height,
+            worldX: pixiNodeElement.x,
+            worldY: pixiNodeElement.y,
+            sizeX: divElement.offsetWidth, // number of pixels wide // using .style.width is a string not useful
+            sizeY: divElement.offsetHeight,
         };
 
         localStorage.setItem(nodeData.id, JSON.stringify(nodeData));
     }
 
-    return Node_DOM_Element;
+    // remove node data
+    function deleteNodeData() {
+        pixiNodeElement.removeFromParent();
+        localStorage.removeItem(id);
+    }
+
+    return pixiNodeElement;
+}
+
+export function newNode(worldX, worldY) {
+    return nodeBuilder(
+        crypto.randomUUID(),
+        "",
+        "",
+        getCurrLayer(),
+        worldX,
+        worldY,
+    );
 }
