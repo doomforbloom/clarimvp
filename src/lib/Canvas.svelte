@@ -17,7 +17,8 @@
         const layer = createNewLayer(colors.at(getCurrLayer() % colors.length));
         app.stage.addChild(layer);
 
-        //  app.stage.addChild(HUD())
+        // work on adding HUD
+        app.stage.addChild(HUD())
 
         // listen for keypresses to change layers
         window.addEventListener("keypress", (e) => {

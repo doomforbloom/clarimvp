@@ -72,7 +72,8 @@ export function nodeBuilder(id, title, content, currParent, worldX, worldY) {
     // button to delete node
     let deleteBtn = document.createElement("button");
     deleteBtn.textContent = "Delete Node";
-    deleteBtn.onclick = () => {
+    deleteBtn.onclick = (e) => {
+        e.stopPropagation();
         setTypingMode(false);
         deleteNodeData();
     };
