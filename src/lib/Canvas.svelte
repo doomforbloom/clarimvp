@@ -1,13 +1,12 @@
 <script>
     import { Application } from "pixi.js";
-    import { getTypingMode } from "./Global.svelte";
+    import { app, getTypingMode } from "./Global.svelte";
     import { setCurrLayer, getCurrLayer } from "./Global.svelte";
     import createNewLayer from "./Layers.svelte";
     import HUD from "./HUD.svelte";
 
     (async () => {
         // create app, init app, add canvas to DOM
-        const app = new Application();
         await app.init({ background: "333333", resizeTo: window });
         app.canvas.style.position = "absolute"; // make sure canvas fills screen
         document.body.appendChild(app.canvas);

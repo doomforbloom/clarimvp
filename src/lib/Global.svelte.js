@@ -1,3 +1,7 @@
+import { Application } from "pixi.js";
+
+export const app = new Application();
+
 let typingMode = false;
 let currLayer = document.cookie
     ? parseInt(document.cookie)
